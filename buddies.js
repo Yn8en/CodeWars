@@ -1,8 +1,4 @@
-//run func default for debug clg --> 
-buddy(4,10);
-
-function buddy(start,limit) {
-    
+function buddy(start, limit) {
     // MemoList Object, containing all calculated integer objects
     // ...may come handy to add some methods lateron
     class MemoList {
@@ -21,6 +17,7 @@ function buddy(start,limit) {
                 console.log("MEMO FOUND: "+ int);
                 return; //rebounce! => BASECASE or MEMO hit!
             }
+            console.log("CALLING addMemo with int: "+int+" __________________________")
             if (multipleA>1 && multipleB>1) {
                 console.log("Appending new Info int: "+int+" + [" + baseDivsA + "] * "+multipleA+"  +  [" +baseDivsB+ "]* "+multipleB);
                 this[int] = new IntegerInfo(int, baseDivsA, multipleA,baseDivsB, multipleB);
@@ -29,7 +26,6 @@ function buddy(start,limit) {
             }
             let prime=true;
             for(let i=2; i<(Math.sqrt(int)); i++) {
-                console.log(`${i} is <= ${Math.sqrt(int)} ... checking`);
                 if (int%i === 0) {
                     this.addMemo(int/i);
                     this.addMemo(i);
@@ -51,7 +47,6 @@ function buddy(start,limit) {
         constructor (int, baseDivsA=[1], multipleA=1, baseDivsB=[1], multipleB = 1) {
             if (multipleA===1) {
                 this.divs=[1];
-                this.sumDivs=1;
                 this.myBelovedBuddy=0;
             } else {
                 const uniqueify = (value, index, self) => (self.indexOf(value) === index);
@@ -60,13 +55,35 @@ function buddy(start,limit) {
                 let incB = int/multipleB;
                 this.divs = new Float64Array([incA, incB, ...baseDivsA, ...baseDivsB, ...baseDivsA.map(x=>x*multipleA), ...baseDivsB.map(x=>x*multipleB)].filter(uniqueify)).sort();
                 console.log("pushed: " + int + " => divs: " + this.divs)
-                this.sumDivs = sumValues(this.divs);
-                this.myBelovedBuddy = this.sumDivs-1;
+                this.myBelovedBuddy = sumValues(this.divs)-1;
             }
         }
     }
-    let lookup = new MemoList;    
     // initialize new MemoList as "lookup"
+    let lookup = new MemoList;    
+    
+    // start,limit
+    function solve (from, upTo) {
+        let chkBuddy;
+        let buddysBuddy;
+        for (let i=from; i<=upTo; i++) {
+            lookup.addMemo(i);  // check 100
+            // addMemo-> 100, [1,2,4,5,10,20,50], 92, 91
+            chkBuddy = lookup[i].myBelovedBuddy; // = 91
+            lookup.addMemo(chkBuddy); // check 91
+            // addMemo-> 91, [1, 7, 13], 21, 20
+            buddysBuddy = lookup[chkBuddy].myBelovedBuddy; // = 20
+            if (buddysBuddy == i) { // check if 100 = 20
+                return [i, chkBuddy];
+            }
+        }
+        return "Nothing";
+    }
+    
+    let result = solve(start,limit);
+    console.log(lookup);
+    return result;
+
     function runRandomTest(n, min, max) {
         for (let i=1; i<n; i++) {
             let int = Math.floor(min+Math.random()*(max-min));
@@ -75,33 +92,12 @@ function buddy(start,limit) {
         }
         return lookup;
     }
-    console.log(Object.keys(runRandomTest(50, 1, 1000)))
+    // console.log(Object.keys(runRandomTest(50, 1, 1000)))
 }
-
-// Buddy pairs
-
-// You know what divisors of a number are. The divisors of a positive integer n are said to be proper when you consider only the divisors other than n itself. In the following description, divisors will mean proper divisors. For example for 100 they are 1, 2, 4, 5, 10, 20, 25, and 50.
-
-// Let s(n) be the sum of these proper divisors of n. Call buddy two positive integers such that the sum of the proper divisors of each number is one more than the other number:
-
-// (n, m) are a pair of buddy if s(m) = n + 1 and s(n) = m + 1
-
-// For example 48 & 75 is such a pair:
-
-//     Divisors of 48 are: 1, 2, 3, 4, 6, 8, 12, 16, 24 --> sum: 76 = 75 + 1
-//     Divisors of 75 are: 1, 3, 5, 15, 25 --> sum: 49 = 48 + 1
+console.log(buddy(4,100));
 
 // Task
 
 // Given two positive integers start and limit, the function buddy(start, limit) should return the first pair (n m) of buddy pairs such that n (positive integer) is between start (inclusive) and limit (inclusive); m can be greater than limit and has to be greater than n
 
 // If there is no buddy pair satisfying the conditions, then return "Nothing" or (for Go lang) nil or (for Dart) null; (for Lua, Pascal, Perl) [-1, -1].
-// Examples
-
-// (depending on the languages)
-
-// buddy(10, 50) returns [48, 75] 
-// buddy(48, 50) returns [48, 75]
-// or
-// buddy(10, 50) returns "(48 75)"
-// buddy(48, 50) returns "(48 75)"
