@@ -20,3 +20,4 @@ function chooseBestSum(t, k, ls) {
 console.log(chooseBestSum(230, 3, [91, 74, 73, 85, 73, 81, 87]))
 // t = 163, k = 3, ls = [50, 55, 56, 57, 58]
 // resulting in -> 163
+// adding comment to test JIRA integration
